@@ -1,0 +1,7 @@
+# Needed to run predict.py with the ONNX model (light, no TensorFlow required)
+numpy>=1.24
+pillow>=10.0
+onnxruntime>=1.17
+
+# Only needed to use the .keras file or retrain (training is done in Google Colab)
+# tensorflow>=2.16
