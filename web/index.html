@@ -875,8 +875,11 @@ const Field = (() => {
       waves.push({ id: ++waveId, x: c.x, y: c.y, r: c.r * 0.7, sp: 6, life: 1, k: kind, delay: 14 });
       poke(c.x, c.y, 0.6);
     },
-    transmit(from, to, done) {
+    transmit(from, to, cb) {
+      let fired = false;
+      const done = () => { if (!fired) { fired = true; cb(); } };
       if (still) { done(); return; }
+      setTimeout(done, 1100);   // never let the animation gate the analysis (rAF may not run at all)
       const a = from.getBoundingClientRect(), b = centerOf(to);
       const x0 = a.left + a.width / 2, y0 = a.top + a.height / 2;
       const n = 14;
@@ -932,7 +935,9 @@ const Field = (() => {
   }
 
   // scroll reveals
+  let ioAlive = false;
   const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+    ioAlive = true;
     entries.forEach((en) => {
       if (!en.isIntersecting) return;
       en.target.classList.add('in');
@@ -941,6 +946,12 @@ const Field = (() => {
     });
   }, { threshold: 0.15 }) : null;
   document.querySelectorAll('.reveal').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
+  // If the observer never reports (non-rendering or headless tabs), show everything rather than leave it hidden.
+  setTimeout(() => {
+    if (ioAlive) return;
+    document.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
+    countStats();
+  }, 1500);
 
   document.querySelectorAll('.links a').forEach((a) => {
     if (a.getAttribute('href') === '#') {
@@ -956,12 +967,15 @@ const Field = (() => {
   function tween(ms, fn) {
     if (Field.still) { fn(1); return; }
     const t0 = performance.now();
+    let finished = false;
     const tick = (now) => {
+      if (finished) return;
       const k = Math.min(1, (now - t0) / ms);
       fn(1 - Math.pow(1 - k, 3));
-      if (k < 1) requestAnimationFrame(tick);
+      if (k < 1) requestAnimationFrame(tick); else finished = true;
     };
     requestAnimationFrame(tick);
+    setTimeout(() => { if (!finished) { finished = true; fn(1); } }, ms + 100);   // final value even if rAF is paused
   }
 
   let statsCounted = false;
@@ -1183,7 +1197,7 @@ const Field = (() => {
     v.textContent = tumor ? 'Tumor likely' : 'No tumor found';
     $('thresh').style.transform = `rotate(${t * 360}deg)`;
     $('thresh-label').textContent = `LINE ${t.toFixed(2)}`;
-    requestAnimationFrame(() => { $('arc').style.strokeDasharray = `${Math.max(0.6, p * 100)} 100`; });
+    setTimeout(() => { $('arc').style.strokeDasharray = `${Math.max(0.6, p * 100)} 100`; }, 30);
     $('score').hidden = false;
     $('score-t').textContent = t.toFixed(2);
     tween(1400, (k) => { $('score-p').textContent = (p * k).toFixed(3); });
