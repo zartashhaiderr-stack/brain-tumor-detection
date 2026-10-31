@@ -1,0 +1,5 @@
+subtype,images,correct,correct %
+glioma,386,355,91.97
+meningioma,398,387,97.24
+notumor,400,400,100.0
+pituitary,400,400,100.0

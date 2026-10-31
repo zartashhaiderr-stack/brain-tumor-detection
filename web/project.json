@@ -1,0 +1,135 @@
+{
+  "title": "Brain tumor detection from MRI",
+  "generated": "2026-10-31 00:24 UTC",
+  "quick_test": false,
+  "model": {
+    "name": "EfficientNetB0 fine-tuned (binary)",
+    "task": "Brain MRI: tumor vs no tumor",
+    "files": {
+      "keras": "weights/brain_tumor_effnetb0.keras",
+      "onnx": "weights/brain_tumor_effnetb0.onnx"
+    },
+    "input": {
+      "name": "image",
+      "shape": [
+        null,
+        224,
+        224,
+        3
+      ],
+      "dtype": "float32",
+      "format": "RGB pixels 0-255, resized to 224x224, no normalization (the model scales internally)"
+    },
+    "output": {
+      "name": "tumor_probability",
+      "meaning": "probability that the scan contains a tumor"
+    },
+    "threshold": 0.5,
+    "threshold_note": "Chosen on the validation set to catch at least 98% of tumors (capped at 0.5)",
+    "labels": {
+      "0": "No tumor",
+      "1": "Tumor"
+    },
+    "web_file": "model/brain_tumor_effnetb0.onnx"
+  },
+  "test_metrics": {
+    "threshold": 0.5,
+    "accuracy": 0.9735,
+    "sensitivity": 0.9645,
+    "specificity": 1.0,
+    "precision": 1.0,
+    "f1": 0.9819,
+    "auc": 0.998,
+    "tp": 1142,
+    "fn": 42,
+    "tn": 400,
+    "fp": 0
+  },
+  "comparison": [
+    {
+      "model": "Custom CNN",
+      "threshold": 0.1674,
+      "accuracy": 0.9223,
+      "sensitivity": 0.897,
+      "specificity": 0.9975,
+      "precision": 0.9991,
+      "f1": 0.9453,
+      "auc": 0.9823,
+      "missed_tumors": 122,
+      "false_alarms": 1
+    },
+    {
+      "model": "VGG16 (frozen)",
+      "threshold": 0.5,
+      "accuracy": 0.964,
+      "sensitivity": 0.9552,
+      "specificity": 0.99,
+      "precision": 0.9965,
+      "f1": 0.9754,
+      "auc": 0.9943,
+      "missed_tumors": 53,
+      "false_alarms": 4
+    },
+    {
+      "model": "EfficientNetB0 (fine-tuned)",
+      "threshold": 0.5,
+      "accuracy": 0.9735,
+      "sensitivity": 0.9645,
+      "specificity": 1.0,
+      "precision": 1.0,
+      "f1": 0.9819,
+      "auc": 0.998,
+      "missed_tumors": 42,
+      "false_alarms": 0
+    }
+  ],
+  "dataset": {
+    "name": "Brain Tumor MRI Dataset (Masoud Nickparvar)",
+    "url": "https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset",
+    "duplicates_removed": 187,
+    "train": 4614,
+    "validation": 815,
+    "test": 1584,
+    "classes": "glioma + meningioma + pituitary = Tumor; notumor = No tumor"
+  },
+  "training": {
+    "image_size": 224,
+    "batch_size": 32,
+    "head_epochs": 8,
+    "total_epochs": 18,
+    "optimizer": "Adam (1e-3 head, 3e-5 fine-tune)",
+    "framework": "TensorFlow 2.21.0 / Keras 3.13.2"
+  },
+  "samples": [
+    {
+      "file": "samples/glioma_1.jpg",
+      "truth": "Tumor",
+      "subtype": "glioma"
+    },
+    {
+      "file": "samples/meningioma_2.jpg",
+      "truth": "Tumor",
+      "subtype": "meningioma"
+    },
+    {
+      "file": "samples/pituitary_3.jpg",
+      "truth": "Tumor",
+      "subtype": "pituitary"
+    },
+    {
+      "file": "samples/notumor_4.jpg",
+      "truth": "No tumor",
+      "subtype": "notumor"
+    },
+    {
+      "file": "samples/notumor_5.jpg",
+      "truth": "No tumor",
+      "subtype": "notumor"
+    },
+    {
+      "file": "samples/notumor_6.jpg",
+      "truth": "No tumor",
+      "subtype": "notumor"
+    }
+  ]
+}

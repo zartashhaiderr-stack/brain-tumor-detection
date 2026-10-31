@@ -1,0 +1,29 @@
+{
+  "name": "EfficientNetB0 fine-tuned (binary)",
+  "task": "Brain MRI: tumor vs no tumor",
+  "files": {
+    "keras": "weights/brain_tumor_effnetb0.keras",
+    "onnx": "weights/brain_tumor_effnetb0.onnx"
+  },
+  "input": {
+    "name": "image",
+    "shape": [
+      null,
+      224,
+      224,
+      3
+    ],
+    "dtype": "float32",
+    "format": "RGB pixels 0-255, resized to 224x224, no normalization (the model scales internally)"
+  },
+  "output": {
+    "name": "tumor_probability",
+    "meaning": "probability that the scan contains a tumor"
+  },
+  "threshold": 0.5,
+  "threshold_note": "Chosen on the validation set to catch at least 98% of tumors (capped at 0.5)",
+  "labels": {
+    "0": "No tumor",
+    "1": "Tumor"
+  }
+}
