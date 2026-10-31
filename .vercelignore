@@ -1,7 +1,7 @@
-requirements.txt
-predict.py
-notebooks/
-weights/
-results/
-project_outputs/
-project_outputs.zip
+/requirements.txt
+/predict.py
+/notebooks/
+/weights/
+/results/
+/project_outputs/
+/project_outputs.zip
