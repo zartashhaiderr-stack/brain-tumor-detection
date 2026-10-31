@@ -7,6 +7,30 @@
 <meta name="description" content="Upload a brain MRI scan and a fine-tuned EfficientNetB0 model says whether a tumor is likely. Runs fully in your browser, over a live simulation of wandering neurons.">
 <meta name="theme-color" content="#03050c">
 <link rel="alternate" type="application/json" href="project.json" title="Project data and test metrics">
+<link rel="alternate" type="text/plain" href="llms.txt" title="Plain-text summary and links for AI agents">
+<link rel="related" href="https://github.com/zartashhaiderr-stack/brain-tumor-detection" title="GitHub repository">
+<link rel="related" href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset" title="Kaggle dataset">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "Brain tumor detection from MRI (tumor vs no tumor)",
+  "description": "EfficientNetB0 fine-tuned to detect brain tumors in MRI scans, compared with a custom CNN and a frozen VGG16. Runs in the browser with ONNX Runtime Web.",
+  "codeRepository": "https://github.com/zartashhaiderr-stack/brain-tumor-detection",
+  "programmingLanguage": ["Python", "JavaScript"],
+  "runtimePlatform": "TensorFlow / Keras, ONNX Runtime Web",
+  "isBasedOn": {
+    "@type": "Dataset",
+    "name": "Brain Tumor MRI Dataset",
+    "creator": "Masoud Nickparvar",
+    "url": "https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset"
+  },
+  "workExample": [
+    { "@type": "CreativeWork", "name": "Model weights (ONNX)", "url": "model/brain_tumor_effnetb0.onnx" },
+    { "@type": "CreativeWork", "name": "Model config and test metrics (JSON)", "url": "project.json" }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -84,8 +108,8 @@ img { max-width: 100%; display: block; }
 .top nav a.ext:hover { border-color: var(--cyan); box-shadow: 0 0 18px rgba(111, 227, 255, 0.25); }
 .top nav a.ext svg { width: 14px; height: 14px; }
 .top nav a.ext:first-of-type { margin-left: 8px; }
-footer .credits { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; }
-footer .credits a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+footer .credits { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 6px; font: 400 12px/1.6 var(--mono); }
+footer .credits a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line-strong); word-break: break-all; }
 footer .credits a:hover { color: var(--cyan); border-color: var(--cyan); }
 
 /* ---------- hero ---------- */
@@ -461,7 +485,7 @@ footer p { margin: 0; max-width: 70ch; }
     <p class="kicker reveal">03 <span>/ Files</span></p>
     <h2 class="big reveal">Everything behind <em>it</em></h2>
     <!-- EDIT YOUR LINKS HERE: replace each href="#" with the real link. Links left as "#" show as "coming soon". -->
-    <ul class="links reveal">
+    <ul class="links">
       <li><a id="link-github" href="https://github.com/zartashhaiderr-stack/brain-tumor-detection"><strong>GitHub repository</strong><span>Code · weights · notebook</span></a></li>
       <li><a id="link-report" href="#"><strong>Project report</strong><span>Full write-up</span></a></li>
       <li><a id="link-slides" href="#"><strong>Presentation slides</strong><span>PPT</span></a></li>
@@ -478,10 +502,10 @@ footer p { margin: 0; max-width: 70ch; }
   <div class="wrap">
     <div>
       <p>Deep learning semester project. For education only, not for medical diagnosis. Your images are processed on your own device and are not uploaded anywhere.</p>
-      <p class="credits">
-        <a href="https://github.com/zartashhaiderr-stack/brain-tumor-detection" target="_blank" rel="noopener">Source code on GitHub ↗</a>
-        <a href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset" target="_blank" rel="noopener">Brain Tumor MRI Dataset on Kaggle ↗</a>
-      </p>
+      <ul class="credits" aria-label="Project links">
+        <li>GitHub repository: <a href="https://github.com/zartashhaiderr-stack/brain-tumor-detection" target="_blank" rel="noopener">https://github.com/zartashhaiderr-stack/brain-tumor-detection</a></li>
+        <li>Dataset (Kaggle): <a href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset" target="_blank" rel="noopener">https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset</a></li>
+      </ul>
     </div>
     <p class="legend">Background: a live simulation. Each point is a neuron; light travels along its connections. Move or click to stimulate it.</p>
   </div>

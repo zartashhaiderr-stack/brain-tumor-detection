@@ -1,0 +1,25 @@
+# Brain tumor detection from MRI (tumor vs no tumor)
+
+> A fine-tuned EfficientNetB0 that says whether a brain MRI scan shows a tumor. Compared against a custom CNN and a frozen VGG16 baseline. The model runs in the browser on this site with ONNX Runtime Web. Student project, not a medical device.
+
+## Links
+
+- GitHub repository: https://github.com/zartashhaiderr-stack/brain-tumor-detection
+- Dataset (Kaggle, Brain Tumor MRI Dataset by Masoud Nickparvar): https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
+- Model weights (ONNX, used by this site): model/brain_tumor_effnetb0.onnx
+- Model config and test metrics (JSON): project.json
+- Training notebook: https://github.com/zartashhaiderr-stack/brain-tumor-detection/blob/main/notebooks/brain_tumor_detection_colab.ipynb
+- Prediction script: https://github.com/zartashhaiderr-stack/brain-tumor-detection/blob/main/predict.py
+
+## Test results (EfficientNetB0, 1,584 test scans)
+
+- Sensitivity (tumors caught): 96.45%
+- Specificity (healthy scans cleared): 100%
+- Accuracy: 97.35%
+- ROC-AUC: 0.998
+- Decision threshold: 0.5
+
+## Model input and output
+
+- Input: RGB image resized to 224 x 224, raw pixels 0 to 255, float32, shape [N, 224, 224, 3]. No normalization.
+- Output: tumor_probability from 0 to 1. Tumor when at or above the threshold.
