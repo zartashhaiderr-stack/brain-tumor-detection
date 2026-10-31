@@ -4,10 +4,8 @@ A deep learning model that looks at a brain MRI scan and says whether a tumor is
 EfficientNetB0 (pretrained on ImageNet, then fine-tuned) is compared against a custom CNN and a frozen VGG16 baseline.
 The final model runs in the browser on the live website.
 
-**Live demo:** ADD_VERCEL_LINK
-**Report:** ADD_REPORT_LINK
-**Video walkthrough:** ADD_YOUTUBE_LINK
-**LinkedIn post:** ADD_LINKEDIN_LINK
+**GitHub repository:** https://github.com/zartashhaiderr-stack/brain-tumor-detection
+**Dataset (Kaggle):** https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
 
 ## Results (test set)
 Full table: [`results/metrics.md`](results/metrics.md). Charts are in [`results/`](results/).
