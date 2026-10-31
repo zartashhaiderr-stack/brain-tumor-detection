@@ -6,6 +6,7 @@
 <title>Synapse · Brain MRI tumor check</title>
 <meta name="description" content="Upload a brain MRI scan and a fine-tuned EfficientNetB0 model says whether a tumor is likely. Runs fully in your browser, over a live simulation of wandering neurons.">
 <meta name="theme-color" content="#03050c">
+<meta name="author" content="Muhammad Mujtaba Hassan (Roll no. SU92-BSCSM-F23-614), Superior University">
 <link rel="canonical" href="https://brain-tumor-detection-sigma-eight.vercel.app/">
 <link rel="alternate" type="application/json" href="project.json" title="Project data and test metrics">
 <link rel="alternate" type="text/plain" href="llms.txt" title="Plain-text summary and links for AI agents">
@@ -18,6 +19,12 @@
   "name": "Brain tumor detection from MRI (tumor vs no tumor)",
   "description": "EfficientNetB0 fine-tuned to detect brain tumors in MRI scans, compared with a custom CNN and a frozen VGG16. Runs in the browser with ONNX Runtime Web.",
   "url": "https://brain-tumor-detection-sigma-eight.vercel.app",
+  "author": {
+    "@type": "Person",
+    "name": "Muhammad Mujtaba Hassan",
+    "identifier": "SU92-BSCSM-F23-614",
+    "affiliation": { "@type": "CollegeOrUniversity", "name": "Superior University" }
+  },
   "codeRepository": "https://github.com/zartashhaiderr-stack/brain-tumor-detection",
   "programmingLanguage": ["Python", "JavaScript"],
   "runtimePlatform": "TensorFlow / Keras, ONNX Runtime Web",
@@ -110,6 +117,11 @@ img { max-width: 100%; display: block; }
 .top nav a.ext:hover { border-color: var(--cyan); box-shadow: 0 0 18px rgba(111, 227, 255, 0.25); }
 .top nav a.ext svg { width: 14px; height: 14px; }
 .top nav a.ext:first-of-type { margin-left: 8px; }
+.author { display: inline-flex; align-items: center; gap: 16px; margin: 0 0 30px; padding: 10px 20px 10px 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--glass); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.author img { height: 72px; width: auto; filter: drop-shadow(0 0 10px rgba(205, 80, 190, 0.5)); }
+.author strong { display: block; font: 500 16px/1.3 var(--sans); color: var(--ink); margin-bottom: 3px; }
+.author span { display: block; font: 400 11px/1.6 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+footer .author { margin: 0 0 18px; }
 footer .credits { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 6px; font: 400 12px/1.6 var(--mono); }
 footer .credits a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line-strong); word-break: break-all; }
 footer .credits a:hover { color: var(--cyan); border-color: var(--cyan); }
@@ -303,6 +315,9 @@ footer p { margin: 0; max-width: 70ch; }
   .step + .step { border-top: 1px solid var(--line); }
   .tag { display: none; }
   .samples { gap: 8px; }
+  .author { gap: 12px; padding: 8px 14px 8px 8px; }
+  .author img { height: 50px; }
+  .author span { letter-spacing: 0.04em; white-space: nowrap; }
   section.block { padding: 84px 0; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -345,6 +360,14 @@ footer p { margin: 0; max-width: 70ch; }
 
   <main class="hero">
     <div>
+      <div class="author fade" style="--d:0s">
+        <img src="assets/superior-university-logo.png" alt="Superior University logo" width="339" height="230">
+        <div>
+          <strong>Muhammad Mujtaba Hassan</strong>
+          <span>Roll no. SU92-BSCSM-F23-614</span>
+          <span>Superior University</span>
+        </div>
+      </div>
       <p class="eyebrow fade" style="--d:.1s">EfficientNetB0 · running on your device</p>
       <h1 aria-label="Let a neural network read the brain.">
         <span class="w" aria-hidden="true"><span style="--i:0">Let</span></span>
@@ -498,6 +521,14 @@ footer p { margin: 0; max-width: 70ch; }
 <footer>
   <div class="wrap">
     <div>
+      <div class="author">
+        <img src="assets/superior-university-logo.png" alt="Superior University logo" width="339" height="230" loading="lazy">
+        <div>
+          <strong>Muhammad Mujtaba Hassan</strong>
+          <span>Roll no. SU92-BSCSM-F23-614</span>
+          <span>Superior University</span>
+        </div>
+      </div>
       <p>Deep learning semester project. For education only, not for medical diagnosis. Your images are processed on your own device and are not uploaded anywhere.</p>
       <ul class="credits" aria-label="Project links">
         <li>GitHub repository: <a href="https://github.com/zartashhaiderr-stack/brain-tumor-detection" target="_blank" rel="noopener">https://github.com/zartashhaiderr-stack/brain-tumor-detection</a></li>

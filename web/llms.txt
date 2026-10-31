@@ -2,6 +2,12 @@
 
 > A fine-tuned EfficientNetB0 that says whether a brain MRI scan shows a tumor. Compared against a custom CNN and a frozen VGG16 baseline. The model runs in the browser on this site with ONNX Runtime Web. Student project, not a medical device.
 
+## Author
+
+- Name: Muhammad Mujtaba Hassan
+- Roll no: SU92-BSCSM-F23-614
+- University: Superior University
+
 ## Links
 
 - Live website: https://brain-tumor-detection-sigma-eight.vercel.app
