@@ -6,6 +6,10 @@
 <title>Synapse · Brain MRI tumor check</title>
 <meta name="description" content="Upload a brain MRI scan and a fine-tuned EfficientNetB0 model says whether a tumor is likely. Runs fully in your browser, over a live simulation of wandering neurons.">
 <meta name="theme-color" content="#03050c">
+<script>
+  // Apply the saved theme before the page paints, so it never flashes the wrong colors.
+  try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
+</script>
 <meta name="author" content="Muhammad Mujtaba Hassan (Roll no. SU92-BSCSM-F23-614), Superior University">
 <link rel="canonical" href="https://brain-tumor-detection-sigma-eight.vercel.app/">
 <link rel="alternate" type="application/json" href="project.json" title="Project data and test metrics">
@@ -57,12 +61,59 @@
   --tumor: #ff5a7e;
   --clear: #3cf0b8;
   --warn: #ffd27a;
+  --warn-line: rgba(255, 210, 122, 0.35);
+  --warn-bg: rgba(60, 44, 10, 0.5);
+  --veil: rgba(3, 5, 12, 0.62);
+  --veil-0: rgba(3, 5, 12, 0);
+  --btn: rgba(10, 18, 36, 0.8);
+  --btn-fill: #070c1a;
+  --btn-fill-hover: #0c1630;
+  --tick: rgba(160, 200, 255, 0.28);
+  --tick-major: rgba(160, 210, 255, 0.6);
+  --track: rgba(150, 190, 255, 0.1);
+  --tint-a: rgba(110, 80, 255, 0.16);
+  --tint-b: rgba(0, 170, 220, 0.12);
+  --vignette: rgba(0, 0, 0, 0.62);
   --serif: "Instrument Serif", "Times New Roman", serif;
   --sans: "Geist", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   color-scheme: dark;
 }
+/* Light theme. The neuron canvas is drawn the same way and inverted with a CSS filter,
+   so --bg matches what the inverted canvas background comes out as. */
+:root[data-theme="light"] {
+  --bg: #f8faff;
+  --ink: #0d1526;
+  --muted: #4a5670;
+  --faint: #66718b;
+  --line: rgba(30, 50, 110, 0.14);
+  --line-strong: rgba(30, 50, 110, 0.28);
+  --glass: rgba(255, 255, 255, 0.66);
+  --cyan: #0577a0;
+  --violet: #5b3fd6;
+  --tumor: #c8224b;
+  --clear: #0a8a63;
+  --warn: #8f5a00;
+  --warn-line: rgba(143, 90, 0, 0.35);
+  --warn-bg: rgba(255, 236, 190, 0.7);
+  --veil: rgba(248, 250, 255, 0.72);
+  --veil-0: rgba(248, 250, 255, 0);
+  --btn: rgba(255, 255, 255, 0.85);
+  --btn-fill: #ffffff;
+  --btn-fill-hover: #eef4ff;
+  --tick: rgba(30, 60, 120, 0.3);
+  --tick-major: rgba(30, 60, 120, 0.6);
+  --track: rgba(30, 60, 120, 0.12);
+  --tint-a: rgba(110, 80, 255, 0.08);
+  --tint-b: rgba(0, 150, 200, 0.07);
+  --vignette: rgba(190, 205, 235, 0.35);
+  color-scheme: light;
+}
+:root[data-theme="light"] #field { filter: invert(1) hue-rotate(180deg); }
+:root[data-theme="light"] .grain { opacity: 0.04; }
+/* The scan viewer stays dark in both themes, because MRI scans are dark images. */
+:root[data-theme="light"] .aperture { --ink: #eaf0fa; --faint: #8f9ab3; }
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--bg); scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -85,9 +136,9 @@ img { max-width: 100%; display: block; }
 .aura {
   position: fixed; inset: 0; z-index: 1; pointer-events: none;
   background:
-    radial-gradient(55% 45% at 78% 22%, rgba(110, 80, 255, 0.16), transparent 70%),
-    radial-gradient(45% 55% at 8% 92%, rgba(0, 170, 220, 0.12), transparent 70%),
-    radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.62) 100%);
+    radial-gradient(55% 45% at 78% 22%, var(--tint-a), transparent 70%),
+    radial-gradient(45% 55% at 8% 92%, var(--tint-b), transparent 70%),
+    radial-gradient(ellipse at center, transparent 45%, var(--vignette) 100%);
 }
 .grain {
   position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay;
@@ -108,6 +159,8 @@ img { max-width: 100%; display: block; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0; flex-wrap: wrap; }
 .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); font: 500 13px/1 var(--mono); letter-spacing: 0.32em; text-transform: uppercase; }
 .brand svg { width: 30px; height: 30px; }
+.brand svg path { stroke: var(--cyan); }
+.brand .mark-core { fill: var(--ink); }
 .brand .mark-core { animation: beat 2.8s var(--ease) infinite; transform-origin: 16px 16px; }
 @keyframes beat { 0%, 70%, 100% { transform: scale(1); } 78% { transform: scale(1.5); } }
 .top nav { display: flex; gap: 28px; flex-wrap: wrap; }
@@ -117,6 +170,11 @@ img { max-width: 100%; display: block; }
 .top nav a.ext:hover { border-color: var(--cyan); box-shadow: 0 0 18px rgba(111, 227, 255, 0.25); }
 .top nav a.ext svg { width: 14px; height: 14px; }
 .top nav a.ext:first-of-type { margin-left: 8px; }
+.theme-toggle { display: inline-grid; place-items: center; width: 34px; height: 34px; margin: -8px 0; padding: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; transition: border-color 0.3s, box-shadow 0.3s; }
+.theme-toggle:hover { border-color: var(--cyan); box-shadow: 0 0 18px rgba(111, 227, 255, 0.25); }
+.theme-toggle svg { width: 16px; height: 16px; }
+.theme-toggle .sun, :root[data-theme="light"] .theme-toggle .moon { display: none; }
+:root[data-theme="light"] .theme-toggle .sun { display: block; }
 .author { display: inline-flex; align-items: center; gap: 16px; margin: 0 0 30px; padding: 10px 20px 10px 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--glass); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .author img { height: 72px; width: auto; filter: drop-shadow(0 0 10px rgba(205, 80, 190, 0.5)); }
 .author strong { display: block; font: 500 16px/1.3 var(--sans); color: var(--ink); margin-bottom: 3px; }
@@ -154,15 +212,15 @@ h1 em { font-style: italic; background: linear-gradient(100deg, var(--cyan), var
 .upload {
   position: relative; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; isolation: isolate;
   padding: 16px 28px; border-radius: 999px; font: 500 15px/1 var(--sans); color: var(--ink); letter-spacing: 0.01em;
-  background: rgba(10, 18, 36, 0.8);
+  background: var(--btn);
 }
 .upload::before {
   content: ""; position: absolute; inset: -1px; border-radius: inherit; z-index: -2; padding: 1px;
   background: conic-gradient(from var(--ang, 0deg), var(--cyan), var(--violet), transparent 40%, var(--cyan));
   animation: orbit 4s linear infinite;
 }
-.upload::after { content: ""; position: absolute; inset: 1px; border-radius: inherit; z-index: -1; background: #070c1a; transition: background 0.3s; }
-.upload:hover::after { background: #0c1630; }
+.upload::after { content: ""; position: absolute; inset: 1px; border-radius: inherit; z-index: -1; background: var(--btn-fill); transition: background 0.3s; }
+.upload:hover::after { background: var(--btn-fill-hover); }
 .upload svg { width: 18px; height: 18px; }
 .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 @property --ang { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
@@ -189,10 +247,10 @@ h1 em { font-style: italic; background: linear-gradient(100deg, var(--cyan), var
 .lens { position: relative; width: 100%; max-width: 560px; aspect-ratio: 1; margin: 0 auto; }
 .dial { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .dial .ticks { transform-origin: 100px 100px; animation: spin 90s linear infinite; }
-.dial .ticks line { stroke: rgba(160, 200, 255, 0.28); stroke-width: 0.35; }
-.dial .ticks line.major { stroke: rgba(160, 210, 255, 0.6); stroke-width: 0.5; }
+.dial .ticks line { stroke: var(--tick); stroke-width: 0.35; }
+.dial .ticks line.major { stroke: var(--tick-major); stroke-width: 0.5; }
 .lens.busy .dial .ticks { animation-duration: 5s; }
-.dial .track { fill: none; stroke: rgba(150, 190, 255, 0.1); stroke-width: 1.2; }
+.dial .track { fill: none; stroke: var(--track); stroke-width: 1.2; }
 .dial .arc { fill: none; stroke: var(--cyan); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 0 100; transition: stroke-dasharray 1.6s var(--ease), stroke 0.6s; filter: drop-shadow(0 0 3px currentColor); }
 .lens[data-v="tumor"] .arc { stroke: var(--tumor); color: var(--tumor); }
 .lens[data-v="clear"] .arc { stroke: var(--clear); color: var(--clear); }
@@ -243,12 +301,12 @@ h1 em { font-style: italic; background: linear-gradient(100deg, var(--cyan), var
 .truth[hidden], .warn[hidden] { display: none; }
 .truth[data-right="yes"]::before { content: "✓"; color: var(--clear); }
 .truth[data-right="no"]::before { content: "✕"; color: var(--tumor); }
-.warn { margin: 14px auto 0; color: var(--warn); border: 1px solid rgba(255, 210, 122, 0.35); background: rgba(60, 44, 10, 0.5); padding: 10px 16px; border-radius: 12px; font-size: 13px; max-width: 48ch; }
+.warn { margin: 14px auto 0; color: var(--warn); border: 1px solid var(--warn-line); background: var(--warn-bg); padding: 10px 16px; border-radius: 12px; font-size: 13px; max-width: 48ch; }
 
 /* ---------- sections ---------- */
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity 1.1s var(--ease), transform 1.1s var(--ease); }
 .reveal.in { opacity: 1; transform: none; }
-section.block { padding: 120px 0; background: linear-gradient(rgba(3, 5, 12, 0), rgba(3, 5, 12, 0.62) 120px, rgba(3, 5, 12, 0.62) calc(100% - 120px), rgba(3, 5, 12, 0)); }
+section.block { padding: 120px 0; background: linear-gradient(var(--veil-0), var(--veil) 120px, var(--veil) calc(100% - 120px), var(--veil-0)); }
 .kicker { font: 400 12px/1 var(--mono); letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); margin: 0 0 22px; display: flex; gap: 14px; align-items: center; }
 .kicker span { color: var(--faint); }
 h2.big { font: 400 clamp(40px, 5.4vw, 76px)/1 var(--serif); letter-spacing: -0.02em; margin: 0 0 26px; max-width: 18ch; }
@@ -355,6 +413,14 @@ footer p { margin: 0; max-width: 70ch; }
         <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M8 1.5c3.6 0 6.5 1.3 6.5 2.9S11.6 7.3 8 7.3 1.5 6 1.5 4.4 4.4 1.5 8 1.5Zm6.5 2.9v7.2c0 1.6-2.9 2.9-6.5 2.9s-6.5-1.3-6.5-2.9V4.4M14.5 8c0 1.6-2.9 2.9-6.5 2.9S1.5 9.6 1.5 8"/></svg>
         Dataset
       </a>
+      <a class="ext" href="report/brain-tumor-detection-report.pdf" download>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg>
+        Report
+      </a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme">
+        <svg class="moon" viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" d="M13.5 9.6A5.8 5.8 0 0 1 6.4 2.5a5.8 5.8 0 1 0 7.1 7.1Z"/></svg>
+        <svg class="sun" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.05 3.05l1.13 1.13M11.82 11.82l1.13 1.13M3.05 12.95l1.13-1.13M11.82 4.18l1.13-1.13"/></g></svg>
+      </button>
     </nav>
   </header>
 
@@ -512,6 +578,7 @@ footer p { margin: 0; max-width: 70ch; }
     <ul class="links">
       <li><a id="link-github" href="https://github.com/zartashhaiderr-stack/brain-tumor-detection"><strong>GitHub repository</strong><span>Code · weights · notebook</span></a></li>
       <li><a id="link-dataset" href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset"><strong>Dataset on Kaggle</strong><span>Brain Tumor MRI Dataset</span></a></li>
+      <li><a id="link-report" href="report/brain-tumor-detection-report.pdf" download><strong>Project report</strong><span>PDF · 15 pages</span></a></li>
       <li><a href="model/brain_tumor_effnetb0.onnx" download><strong>Model weights</strong><span>ONNX · used by this page</span></a></li>
       <li><a href="project.json"><strong>Config and metrics</strong><span>JSON</span></a></li>
     </ul>
@@ -533,6 +600,7 @@ footer p { margin: 0; max-width: 70ch; }
       <ul class="credits" aria-label="Project links">
         <li>GitHub repository: <a href="https://github.com/zartashhaiderr-stack/brain-tumor-detection" target="_blank" rel="noopener">https://github.com/zartashhaiderr-stack/brain-tumor-detection</a></li>
         <li>Dataset (Kaggle): <a href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset" target="_blank" rel="noopener">https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset</a></li>
+        <li>Project report (PDF): <a href="report/brain-tumor-detection-report.pdf" download>Download the full report</a></li>
       </ul>
     </div>
     <p class="legend">Background: a live simulation. Each point is a neuron; light travels along its connections. Move or click to stimulate it.</p>
@@ -540,6 +608,24 @@ footer p { margin: 0; max-width: 70ch; }
 </footer>
 </div>
 
+<script>
+(() => {
+  const btn = document.getElementById('theme-toggle');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const apply = (light) => {
+    if (light) document.documentElement.dataset.theme = 'light';
+    else delete document.documentElement.dataset.theme;
+    btn.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+    meta.content = light ? '#f8faff' : '#03050c';
+  };
+  apply(document.documentElement.dataset.theme === 'light');
+  btn.addEventListener('click', () => {
+    const light = document.documentElement.dataset.theme !== 'light';
+    apply(light);
+    try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch (e) {}
+  });
+})();
+</script>
 <script>
 /* ---------------------------------------------------------------
    The neuron field: wandering cells, dendrites, connections and
