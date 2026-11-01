@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brain Tumor Detection from MRI - Project Report</title>
+<style>
+@page { size: A4; margin: 20mm 18mm 20mm 18mm; }
+:root {
+  --ink: #16202e;
+  --muted: #4d5a6b;
+  --faint: #8592a3;
+  --line: #d6dde6;
+  --accent: #0b6e8a;
+  --tumor: #b42345;
+  --clear: #0f7b6c;
+  --wash: #eef4f7;
+}
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; color: var(--ink); background: #fff; font: 10.5pt/1.55 "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; color: var(--ink); text-wrap: balance; }
+h2 { font-size: 17pt; margin: 0 0 8pt; padding-top: 2pt; border-bottom: 1.5pt solid var(--accent); padding-bottom: 4pt; break-after: avoid; }
+h2 .num { color: var(--accent); margin-right: 6pt; }
+h3 { font-size: 12pt; margin: 14pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 7pt; }
+ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+li { margin-bottom: 2pt; }
+a { color: var(--accent); text-decoration: none; word-break: break-all; }
+code { font: 9pt Consolas, "Courier New", monospace; background: var(--wash); padding: 0 3pt; border-radius: 2pt; }
+pre { font: 8.8pt/1.45 Consolas, "Courier New", monospace; background: var(--wash); border: 0.75pt solid var(--line); padding: 7pt 9pt; border-radius: 3pt; white-space: pre-wrap; break-inside: avoid; margin: 0 0 8pt; }
+section { margin-bottom: 16pt; }
+.break { break-before: page; }
+table { width: 100%; border-collapse: collapse; margin: 4pt 0 10pt; font-size: 9.5pt; break-inside: avoid; }
+th, td { border-bottom: 0.75pt solid var(--line); padding: 4pt 6pt; text-align: left; vertical-align: top; }
+th { background: var(--wash); font-weight: 600; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.best td { font-weight: 600; background: #f4fafc; }
+figure { margin: 6pt 0 12pt; break-inside: avoid; }
+figure img { width: 100%; border: 0.75pt solid var(--line); }
+figcaption { font-size: 8.8pt; color: var(--muted); margin-top: 3pt; }
+.note { border-left: 3pt solid var(--accent); background: var(--wash); padding: 6pt 9pt; margin: 6pt 0 10pt; font-size: 9.8pt; break-inside: avoid; }
+.warn { border-left-color: var(--tumor); }
+
+/* Cover */
+.cover { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; break-after: page; }
+.cover .top { text-align: center; padding-top: 10mm; }
+.cover img { width: 46mm; }
+.cover .uni { font: 600 13pt Georgia, serif; margin-top: 4mm; letter-spacing: 0.04em; }
+.cover .dept { color: var(--muted); font-size: 10pt; }
+.cover .title { text-align: center; }
+.cover .kicker { font-size: 9pt; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 4mm; }
+.cover h1 { font-size: 27pt; line-height: 1.15; margin: 0 0 4mm; }
+.cover .sub { font-size: 12pt; color: var(--muted); }
+.cover .meta { margin: 0 auto; width: 120mm; border-top: 1pt solid var(--line); }
+.cover .meta div { display: flex; justify-content: space-between; border-bottom: 1pt solid var(--line); padding: 2.5mm 0; font-size: 10.5pt; }
+.cover .meta span:first-child { color: var(--muted); }
+.cover .foot { text-align: center; color: var(--faint); font-size: 8.5pt; }
+
+/* Stat strip */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6pt; margin: 8pt 0 12pt; break-inside: avoid; }
+.stat { border: 0.75pt solid var(--line); border-radius: 3pt; padding: 6pt 8pt; }
+.stat b { display: block; font: 600 17pt Georgia, serif; color: var(--accent); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 8.5pt; color: var(--muted); }
+
+/* Contents */
+.toc ol { list-style: none; padding: 0; columns: 2; column-gap: 18pt; }
+.toc li { border-bottom: 0.5pt dotted var(--line); padding: 2.5pt 0; break-inside: avoid; }
+.toc li span { color: var(--accent); display: inline-block; width: 18pt; }
+
+/* Pipeline */
+.pipe { display: flex; gap: 4pt; margin: 6pt 0 12pt; break-inside: avoid; }
+.pipe div { flex: 1; border: 0.75pt solid var(--line); border-top: 2.5pt solid var(--accent); padding: 5pt 6pt; font-size: 8.6pt; line-height: 1.35; }
+.pipe b { display: block; font-size: 9pt; margin-bottom: 2pt; }
+</style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="top">
+    <img src="../web/assets/superior-university-logo.png" alt="Superior University logo">
+    <div class="uni">Superior University, Lahore</div>
+    <div class="dept">BS Computer Science · Deep Learning semester project</div>
+  </div>
+  <div class="title">
+    <div class="kicker">Project report</div>
+    <h1>Brain Tumor Detection<br>from MRI Scans</h1>
+    <div class="sub">A fine-tuned EfficientNetB0 that tells tumor from no tumor,<br>deployed as a web app that runs the model in the browser</div>
+  </div>
+  <div class="meta">
+    <div><span>Student</span><span>Muhammad Mujtaba Hassan</span></div>
+    <div><span>Roll number</span><span>SU92-BSCSM-F23-614</span></div>
+    <div><span>Live website</span><span>brain-tumor-detection-sigma-eight.vercel.app</span></div>
+    <div><span>Report date</span><span>1 November 2026</span></div>
+  </div>
+  <div class="foot">Student project for learning purposes. Not a medical device and not for diagnosis.</div>
+</div>
+
+<!-- Abstract + contents -->
+<section>
+  <h2>Abstract</h2>
+  <p>This project builds a deep learning model that looks at a brain MRI scan and says whether a tumor is present. We used the public Brain Tumor MRI Dataset from Kaggle and grouped its glioma, meningioma and pituitary scans as <b>Tumor</b> and the rest as <b>No tumor</b>. Three models were trained and compared: a custom CNN, a frozen VGG16, and a fine-tuned EfficientNetB0.</p>
+  <p>EfficientNetB0 gave the best results on 1,584 unseen test scans: <b>97.35% accuracy, 96.45% sensitivity, 100% specificity and a ROC-AUC of 0.998</b>, with zero false alarms. Duplicate images were removed before splitting, and the test set was used only once, so these scores are honest. The final model was exported to ONNX and runs inside the browser on a website hosted on Vercel. Scans never leave the user's device.</p>
+  <div class="stats">
+    <div class="stat"><b>97.35%</b><span>Accuracy (test)</span></div>
+    <div class="stat"><b>96.45%</b><span>Sensitivity: tumors caught</span></div>
+    <div class="stat"><b>100%</b><span>Specificity: healthy scans cleared</span></div>
+    <div class="stat"><b>0.998</b><span>ROC-AUC</span></div>
+  </div>
+</section>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><span>1</span>Introduction and problem</li>
+    <li><span>2</span>Objectives</li>
+    <li><span>3</span>Dataset</li>
+    <li><span>4</span>Data cleaning and splitting</li>
+    <li><span>5</span>Preprocessing and augmentation</li>
+    <li><span>6</span>Models</li>
+    <li><span>7</span>Training setup</li>
+    <li><span>8</span>Choosing the decision threshold</li>
+    <li><span>9</span>Results</li>
+    <li><span>10</span>Explainability (Grad-CAM)</li>
+    <li><span>11</span>Error analysis</li>
+    <li><span>12</span>Model export and testing</li>
+    <li><span>13</span>Web application and deployment</li>
+    <li><span>14</span>Repository and how to run</li>
+    <li><span>15</span>Limitations</li>
+    <li><span>16</span>Future work</li>
+    <li><span>17</span>Conclusion</li>
+    <li><span>18</span>Links and references</li>
+  </ol>
+</section>
+
+<section class="break">
+  <h2><span class="num">1</span>Introduction and problem</h2>
+  <p>A brain tumor is an abnormal growth of cells in the brain. Doctors find tumors mainly with MRI scans, and reading these scans takes trained radiologists and time. A computer model that flags scans which likely show a tumor can help sort cases faster and act as a second check.</p>
+  <p>This project treats the task as <b>binary classification</b>: given one MRI image, output the probability that it shows a tumor. In screening, a missed tumor (false negative) is far more harmful than a false alarm (false positive). So the project tracks sensitivity and missed tumors, not only accuracy.</p>
+</section>
+
+<section>
+  <h2><span class="num">2</span>Objectives</h2>
+  <ol>
+    <li>Train a model that separates tumor and no-tumor MRI scans with high sensitivity.</li>
+    <li>Compare a model built from scratch with two transfer-learning models.</li>
+    <li>Measure results honestly: no duplicate images across splits and a test set used only once.</li>
+    <li>Show where the model looks, using Grad-CAM heatmaps.</li>
+    <li>Deploy the model as a public website that anyone can try, with no server-side processing of images.</li>
+    <li>Provide a command-line script so evaluators can test the model on their own images.</li>
+  </ol>
+</section>
+
+<section>
+  <h2><span class="num">3</span>Dataset</h2>
+  <p>We used the <a href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset">Brain Tumor MRI Dataset</a> by Masoud Nickparvar on Kaggle (a secondary dataset). It has a <code>Training</code> and a <code>Testing</code> folder, each with four classes: glioma, meningioma, pituitary and notumor. The notebook downloads it automatically with <code>kagglehub</code>; the images are not stored in the GitHub repository.</p>
+  <table>
+    <tr><th>Original class</th><th>Used as</th><th>Label</th></tr>
+    <tr><td>Glioma</td><td>Tumor</td><td>1</td></tr>
+    <tr><td>Meningioma</td><td>Tumor</td><td>1</td></tr>
+    <tr><td>Pituitary</td><td>Tumor</td><td>1</td></tr>
+    <tr><td>No tumor</td><td>No tumor</td><td>0</td></tr>
+  </table>
+  <p>After grouping, tumor images outnumber no-tumor images by about 3 to 1. This imbalance is handled with class weights (Section 7).</p>
+  <figure>
+    <img src="../results/sample_images.png" alt="Example MRI scans from each class">
+    <figcaption>Figure 1. Example scans from the training set, two per class.</figcaption>
+  </figure>
+</section>
+
+<section class="break">
+  <h2><span class="num">4</span>Data cleaning and splitting</h2>
+  <h3>Removing duplicates</h3>
+  <p>Public datasets often contain the same scan more than once. If one copy is in training and another in testing, the model is tested on an image it has already seen and the score looks better than it really is. Every file was fingerprinted with an MD5 hash. Test images that also appear in training were dropped, and only one copy of each image was kept inside a split. <b>187 duplicate images were removed.</b></p>
+  <h3>Splits</h3>
+  <ul>
+    <li><b>Train</b>: 85% of the Training folder, used to learn the weights.</li>
+    <li><b>Validation</b>: 15% of the Training folder (stratified by subtype), used for early stopping and to pick the decision threshold.</li>
+    <li><b>Test</b>: the dataset's own Testing folder, used <b>only once</b> for the final score.</li>
+  </ul>
+  <table>
+    <tr><th>Split</th><th class="n">Images</th><th>Used for</th></tr>
+    <tr><td>Train</td><td class="n">4,614</td><td>Learning the model weights</td></tr>
+    <tr><td>Validation</td><td class="n">815</td><td>Early stopping, threshold choice</td></tr>
+    <tr><td>Test</td><td class="n">1,584</td><td>Final score only</td></tr>
+    <tr><th>Total</th><th class="n">7,013</th><th>after removing 187 duplicates</th></tr>
+  </table>
+  <p>The test set has 1,184 tumor scans (386 glioma, 398 meningioma, 400 pituitary) and 400 no-tumor scans.</p>
+  <figure>
+    <img src="../results/class_distribution.png" alt="Images per subtype and split, and tumor vs no tumor counts">
+    <figcaption>Figure 2. Left: images per subtype and split. Right: tumor vs no tumor in each split (about 3 to 1).</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="num">5</span>Preprocessing and augmentation</h2>
+  <p>Every image is decoded as 3-channel RGB and resized to <b>224 × 224</b>. Pixel values stay in the 0 to 255 range. Each model does its own scaling inside the network, so the Python script and the website only need to resize the image. This removes the most common deployment bug, where preprocessing in the app differs from training.</p>
+  <p>Training images get random augmentation so the model sees more variety and overfits less. Validation and test images are not augmented.</p>
+  <table>
+    <tr><th>Augmentation</th><th>Setting</th></tr>
+    <tr><td>Horizontal flip</td><td>random</td></tr>
+    <tr><td>Rotation</td><td>up to ±5% of a full turn (about ±18°)</td></tr>
+    <tr><td>Zoom</td><td>up to ±10%</td></tr>
+    <tr><td>Translation</td><td>up to ±5% horizontally and vertically</td></tr>
+    <tr><td>Contrast</td><td>up to ±15%</td></tr>
+  </table>
+  <p>The input pipeline uses <code>tf.data</code> with caching, shuffling and prefetching for fast training on a Colab T4 GPU.</p>
+</section>
+
+<section class="break">
+  <h2><span class="num">6</span>Models</h2>
+  <p>Three models were trained on the same data so they can be compared fairly. All three end in a single sigmoid output named <code>tumor_probability</code>.</p>
+  <h3>6.1 Custom CNN (baseline 1)</h3>
+  <p>A network built from scratch: input rescaling to 0–1, then four blocks of Conv2D (32, 64, 128, 256 filters, 3×3) + BatchNorm + ReLU + MaxPooling, then Global Average Pooling, a Dense layer of 128 units, Dropout 0.4, and the sigmoid output. Global Average Pooling replaced the Flatten layer of the original design; Flatten added millions of weights and caused overfitting.</p>
+  <h3>6.2 VGG16, frozen (baseline 2)</h3>
+  <p>VGG16 pretrained on ImageNet with all its layers frozen. On top: Global Average Pooling, Dense 256 with ReLU, Dropout 0.5, and the sigmoid output. Only the new head is trained.</p>
+  <h3>6.3 EfficientNetB0, fine-tuned (final model)</h3>
+  <p>EfficientNetB0 pretrained on ImageNet, followed by Global Average Pooling, Dropout 0.3 and the sigmoid output. It is more accurate than VGG16 while being about four times smaller (around 16 MB), so it loads quickly in a browser. Training has two phases:</p>
+  <ol>
+    <li><b>Head only</b>: the pretrained base is frozen and only the new top layer learns (learning rate 1e-3).</li>
+    <li><b>Fine-tuning</b>: the whole network is unlocked and trained with a very small learning rate (3e-5) so it adapts to MRI scans without forgetting what it already knows. BatchNorm layers stay frozen to keep fine-tuning stable.</li>
+  </ol>
+  <div class="pipe">
+    <div><b>Input</b>RGB 224×224, pixels 0–255</div>
+    <div><b>EfficientNetB0</b>ImageNet weights, scaling built in</div>
+    <div><b>Global Avg Pool</b>1,280 features</div>
+    <div><b>Dropout 0.3</b>reduces overfitting</div>
+    <div><b>Dense 1, sigmoid</b>tumor probability 0–1</div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">7</span>Training setup</h2>
+  <table>
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>Framework</td><td>TensorFlow 2.21.0, Keras 3.13.2 (Google Colab, T4 GPU)</td></tr>
+    <tr><td>Image size / batch size</td><td>224 × 224 / 32</td></tr>
+    <tr><td>Loss</td><td>Binary cross-entropy</td></tr>
+    <tr><td>Optimizer</td><td>Adam (1e-3 for the head and baselines, 3e-5 for fine-tuning)</td></tr>
+    <tr><td>Class weights</td><td>Inverse class frequency, so the model does not just favor "tumor"</td></tr>
+    <tr><td>Metrics tracked</td><td>Accuracy, AUC, recall, precision</td></tr>
+    <tr><td>Early stopping</td><td>On validation AUC, best epoch restored</td></tr>
+    <tr><td>Learning-rate schedule</td><td>Reduce by 0.3× when validation loss stalls for 2 epochs</td></tr>
+    <tr><td>Max epochs</td><td>Custom CNN 25, VGG16 12, EfficientNet 8 (head) + 15 (fine-tune)</td></tr>
+    <tr><td>EfficientNet epochs run</td><td>18 in total: 8 head + 10 fine-tune (early stopping)</td></tr>
+    <tr><td>Random seed</td><td>42</td></tr>
+  </table>
+  <p>In the final epochs the model reached 99.0% validation accuracy, 0.995 validation AUC and 99.5% validation recall.</p>
+  <figure>
+    <img src="../results/training_curves.png" alt="Loss, accuracy and AUC curves for training and validation">
+    <figcaption>Figure 3. EfficientNetB0 training curves. The dashed line marks the start of fine-tuning.</figcaption>
+  </figure>
+</section>
+
+<section class="break">
+  <h2><span class="num">8</span>Choosing the decision threshold</h2>
+  <p>The model outputs a probability from 0 to 1. The usual cut-off is 0.5, but for screening we want to miss as few tumors as possible. For each model we picked the highest threshold that still catches at least <b>98% of tumors on the validation set</b>, capped at 0.5. The test set was not used for this choice.</p>
+  <p>For EfficientNetB0 and VGG16 this rule gave 0.5. For the custom CNN it gave 0.1674, which caught more tumors than 0.5 would (122 missed instead of 190).</p>
+</section>
+
+<section>
+  <h2><span class="num">9</span>Results</h2>
+  <h3>9.1 Model comparison on the test set (1,584 scans)</h3>
+  <table>
+    <tr><th>Model</th><th class="n">Threshold</th><th class="n">Accuracy</th><th class="n">Sensitivity</th><th class="n">Specificity</th><th class="n">Precision</th><th class="n">F1</th><th class="n">ROC-AUC</th><th class="n">Missed tumors</th><th class="n">False alarms</th></tr>
+    <tr><td>Custom CNN</td><td class="n">0.1674</td><td class="n">92.23%</td><td class="n">89.70%</td><td class="n">99.75%</td><td class="n">99.91%</td><td class="n">94.53%</td><td class="n">0.9823</td><td class="n">122</td><td class="n">1</td></tr>
+    <tr><td>VGG16 (frozen)</td><td class="n">0.5</td><td class="n">96.40%</td><td class="n">95.52%</td><td class="n">99.00%</td><td class="n">99.65%</td><td class="n">97.54%</td><td class="n">0.9943</td><td class="n">53</td><td class="n">4</td></tr>
+    <tr class="best"><td>EfficientNetB0 (fine-tuned)</td><td class="n">0.5</td><td class="n">97.35%</td><td class="n">96.45%</td><td class="n">100.00%</td><td class="n">100.00%</td><td class="n">98.19%</td><td class="n">0.9980</td><td class="n">42</td><td class="n">0</td></tr>
+  </table>
+  <p>EfficientNetB0 is best on every measure. Compared with the custom CNN it misses 80 fewer tumors, and compared with VGG16 it misses 11 fewer tumors and raises no false alarms.</p>
+
+  <h3>9.2 Confusion matrix of the final model</h3>
+  <table style="width:60%">
+    <tr><th></th><th class="n">Predicted no tumor</th><th class="n">Predicted tumor</th></tr>
+    <tr><th>Actual no tumor</th><td class="n">400 (TN)</td><td class="n">0 (FP)</td></tr>
+    <tr><th>Actual tumor</th><td class="n">42 (FN)</td><td class="n">1,142 (TP)</td></tr>
+  </table>
+  <figure>
+    <img src="../results/confusion_and_roc.png" alt="Confusion matrix and ROC curves">
+    <figcaption>Figure 4. Left: confusion matrix of EfficientNetB0 on the test set. Right: ROC curves of all three models.</figcaption>
+  </figure>
+
+  <h3>9.3 Results by tumor type (final model)</h3>
+  <table style="width:70%">
+    <tr><th>Subtype</th><th class="n">Test images</th><th class="n">Correct</th><th class="n">Correct %</th></tr>
+    <tr><td>Glioma</td><td class="n">386</td><td class="n">355</td><td class="n">91.97%</td></tr>
+    <tr><td>Meningioma</td><td class="n">398</td><td class="n">387</td><td class="n">97.24%</td></tr>
+    <tr><td>Pituitary</td><td class="n">400</td><td class="n">400</td><td class="n">100.00%</td></tr>
+    <tr><td>No tumor</td><td class="n">400</td><td class="n">400</td><td class="n">100.00%</td></tr>
+  </table>
+  <p>All 42 missed tumors are gliomas (31) or meningiomas (11). Pituitary tumors and healthy scans were all classified correctly.</p>
+</section>
+
+<section class="break">
+  <h2><span class="num">10</span>Explainability (Grad-CAM)</h2>
+  <p>Grad-CAM colors the parts of a scan that pushed the model toward its answer. It uses the gradients of the tumor probability with respect to the last convolutional feature maps of EfficientNetB0. When the hot spots sit on the tumor area, and not on the skull edge or text labels, it is evidence that the model learned real features.</p>
+  <figure>
+    <img src="../results/gradcam.png" alt="Grad-CAM heatmaps on test scans">
+    <figcaption>Figure 5. Grad-CAM on eight test scans (two per class). Top row: original. Bottom row: where the model looked, with its tumor probability.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="num">11</span>Error analysis</h2>
+  <p>The model made no false alarms on the test set. All errors are missed tumors. The figure below shows examples of these missed scans.</p>
+  <figure>
+    <img src="../results/mistakes.png" alt="Missed tumor scans">
+    <figcaption>Figure 6. Examples of test scans the model got wrong.</figcaption>
+  </figure>
+  <p>Likely reasons:</p>
+  <ul>
+    <li>Some gliomas are small or have low contrast against nearby tissue, so they look close to normal on a single slice.</li>
+    <li>Meningiomas near the skull edge can be confused with normal bright structures.</li>
+    <li>The model sees one 2D slice, not the full 3D scan, and has no patient history.</li>
+  </ul>
+  <p>Lowering the threshold below 0.5 would catch more of these at the cost of some false alarms. The current setting already met the 98% validation recall target.</p>
+</section>
+
+<section class="break">
+  <h2><span class="num">12</span>Model export and testing</h2>
+  <p>The trained model was saved in two formats:</p>
+  <table>
+    <tr><th>File</th><th>Use</th></tr>
+    <tr><td><code>weights/brain_tumor_effnetb0.keras</code></td><td>Normal TensorFlow/Keras model (about 17 MB, optimizer state removed)</td></tr>
+    <tr><td><code>weights/brain_tumor_effnetb0.onnx</code></td><td>Same model in ONNX format; runs in the browser and in <code>predict.py</code> without TensorFlow</td></tr>
+    <tr><td><code>weights/config.json</code></td><td>Input size, threshold (0.5) and labels</td></tr>
+  </table>
+  <p>The graph was frozen and converted with <code>tf2onnx</code>, which keeps EfficientNet's built-in normalization inside the file. Both files were then run on 32 test images to confirm that Keras and ONNX give the same outputs.</p>
+  <h3>Model input and output</h3>
+  <ul>
+    <li><b>Input</b> <code>image</code>: float32, shape <code>[N, 224, 224, 3]</code>, RGB pixels 0–255, no normalization.</li>
+    <li><b>Output</b> <code>tumor_probability</code>: 0 to 1. The scan is classed as Tumor when the value is at or above 0.5.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">13</span>Web application and deployment</h2>
+  <p>The website is a single static page (<code>web/index.html</code>) hosted on <b>Vercel</b> at <a href="https://brain-tumor-detection-sigma-eight.vercel.app">brain-tumor-detection-sigma-eight.vercel.app</a>. There is no backend server.</p>
+  <h3>How a prediction works</h3>
+  <ol>
+    <li>The user uploads an MRI image or clicks one of six sample test scans.</li>
+    <li>The browser resizes the image to 224 × 224 on a canvas and builds the input tensor.</li>
+    <li><b>ONNX Runtime Web</b> (version 1.22.0, WebAssembly) runs the ONNX model directly in the browser.</li>
+    <li>The page shows the tumor probability and the Tumor / No tumor result.</li>
+  </ol>
+  <div class="note">Privacy: images are processed on the user's own device and are never uploaded anywhere.</div>
+  <h3>What the site contains</h3>
+  <ul>
+    <li>A try-it panel with the six sample scans and an upload option.</li>
+    <li>Results section with the test scores and charts, read automatically from <code>project.json</code> (no numbers typed by hand).</li>
+    <li>Method section explaining data, model, training and the decision line.</li>
+    <li>Files section with links to GitHub, the Kaggle dataset, the model weights, the config and this report.</li>
+    <li>An animated background (a live neuron-field simulation) and author details with the Superior University logo.</li>
+    <li><code>llms.txt</code> and structured data so search engines and AI agents can find the project links.</li>
+  </ul>
+  <h3>Deployment settings</h3>
+  <p>Vercel serves the <code>web/</code> folder as a static site: framework "Other", no install or build command, output directory <code>web</code>. Every push to the <code>main</code> branch on GitHub redeploys the site automatically. Training files, notebooks and large weights outside <code>web/</code> are excluded with <code>.vercelignore</code>.</p>
+</section>
+
+<section class="break">
+  <h2><span class="num">14</span>Repository and how to run</h2>
+  <pre>brain-tumor-detection/
+├── notebooks/brain_tumor_detection_colab.ipynb   training (Google Colab)
+├── predict.py                                    command-line prediction
+├── requirements.txt                              numpy, pillow, onnxruntime
+├── weights/                                      .keras + .onnx + config.json
+├── results/                                      charts and metric tables
+├── report/                                       source of this report
+└── web/                                          Vercel website (runs the model in the browser)</pre>
+  <h3>Train the model</h3>
+  <ol>
+    <li>Open the notebook in Google Colab and select a T4 GPU runtime.</li>
+    <li>Run all cells (about 30 to 40 minutes). <code>QUICK_TEST = True</code> runs a short smoke test first.</li>
+    <li>Unzip the downloaded <code>project_outputs.zip</code> into the repository.</li>
+  </ol>
+  <h3>Test the model from the command line</h3>
+  <pre>pip install -r requirements.txt
+python predict.py path/to/image.jpg            # one scan
+python predict.py path/to/folder               # every image in a folder
+python predict.py path/to/Testing --eval       # accuracy, sensitivity, specificity
+python predict.py path/to/image.jpg --json     # machine-readable output</pre>
+  <p><code>predict.py</code> uses only NumPy, Pillow and ONNX Runtime, so TensorFlow is not needed to run predictions.</p>
+</section>
+
+<section>
+  <h2><span class="num">15</span>Limitations</h2>
+  <ul>
+    <li>The dataset is a public secondary collection. Images come from several sources with different scanners and quality, and patient-level information is not available, so two slices from the same patient could still fall in different splits.</li>
+    <li>The model works on single 2D slices, not full 3D MRI volumes.</li>
+    <li>It only answers tumor vs no tumor. It does not name the tumor type or show its exact boundary.</li>
+    <li>It was not tested on scans from a real hospital, so real-world accuracy may be lower.</li>
+    <li>Glioma is the hardest class (91.97% correct).</li>
+  </ul>
+  <div class="note warn">This is a student project for learning purposes. It is not a medical device and must not be used for diagnosis.</div>
+</section>
+
+<section>
+  <h2><span class="num">16</span>Future work</h2>
+  <ul>
+    <li>Classify the tumor type (glioma, meningioma, pituitary) as a four-class problem.</li>
+    <li>Add segmentation to outline the tumor region.</li>
+    <li>Test on an external dataset from a different hospital or scanner.</li>
+    <li>Use 3D models on full MRI volumes.</li>
+    <li>Try larger backbones (EfficientNetB3, ConvNeXt) or ensembles to reduce missed gliomas.</li>
+    <li>Calibrate the probabilities so the score can be read as a true risk.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">17</span>Conclusion</h2>
+  <p>A fine-tuned EfficientNetB0 detects brain tumors in MRI scans with 97.35% accuracy, 96.45% sensitivity, 100% specificity and a ROC-AUC of 0.998 on 1,584 unseen test scans. It beat both a custom CNN and a frozen VGG16. Careful data handling (duplicate removal, a separate validation set, a test set used once) makes these results trustworthy. The model is small enough to run in a web browser, and the live website lets anyone try it privately on their own device.</p>
+</section>
+
+<section>
+  <h2><span class="num">18</span>Links and references</h2>
+  <table>
+    <tr><th>Item</th><th>Link</th></tr>
+    <tr><td>Live website</td><td><a href="https://brain-tumor-detection-sigma-eight.vercel.app">https://brain-tumor-detection-sigma-eight.vercel.app</a></td></tr>
+    <tr><td>GitHub repository</td><td><a href="https://github.com/zartashhaiderr-stack/brain-tumor-detection">https://github.com/zartashhaiderr-stack/brain-tumor-detection</a></td></tr>
+    <tr><td>Dataset (Kaggle)</td><td><a href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset">https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset</a></td></tr>
+    <tr><td>Training notebook</td><td><a href="https://github.com/zartashhaiderr-stack/brain-tumor-detection/blob/main/notebooks/brain_tumor_detection_colab.ipynb">notebooks/brain_tumor_detection_colab.ipynb</a></td></tr>
+    <tr><td>Model config and metrics</td><td><a href="https://brain-tumor-detection-sigma-eight.vercel.app/project.json">https://brain-tumor-detection-sigma-eight.vercel.app/project.json</a></td></tr>
+  </table>
+  <ol>
+    <li>M. Nickparvar, "Brain Tumor MRI Dataset," Kaggle, 2021.</li>
+    <li>M. Tan and Q. V. Le, "EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks," ICML, 2019.</li>
+    <li>K. Simonyan and A. Zisserman, "Very Deep Convolutional Networks for Large-Scale Image Recognition," ICLR, 2015.</li>
+    <li>R. R. Selvaraju et al., "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization," ICCV, 2017.</li>
+    <li>J. Deng et al., "ImageNet: A Large-Scale Hierarchical Image Database," CVPR, 2009.</li>
+    <li>ONNX Runtime Web documentation, onnxruntime.ai.</li>
+  </ol>
+</section>
+
+</body>
+</html>

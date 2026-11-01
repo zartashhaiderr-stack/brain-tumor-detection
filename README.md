@@ -9,6 +9,7 @@ The final model runs in the browser on the live website.
 **Live demo:** https://brain-tumor-detection-sigma-eight.vercel.app
 **GitHub repository:** https://github.com/zartashhaiderr-stack/brain-tumor-detection
 **Dataset (Kaggle):** https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
+**Project report (PDF):** https://brain-tumor-detection-sigma-eight.vercel.app/report/brain-tumor-detection-report.pdf
 
 ## Results (test set)
 Full table: [`results/metrics.md`](results/metrics.md). Charts are in [`results/`](results/).
@@ -29,6 +30,7 @@ python predict.py path/to/image.jpg --json     # machine-readable output
 | Model settings (input size, threshold, labels) | `weights/config.json` |
 | Training notebook | `notebooks/brain_tumor_detection_colab.ipynb` |
 | Prediction script | `predict.py` |
+| Project report (PDF) | `web/report/brain-tumor-detection-report.pdf` (source: `report/report.html`) |
 | Website (Vercel) | `web/` |
 
 **Input format:** RGB image resized to 224 x 224, raw pixel values 0 to 255, shape `[N, 224, 224, 3]`, float32. No normalization needed (the model does it internally).

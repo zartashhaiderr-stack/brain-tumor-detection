@@ -13,6 +13,7 @@
 - Live website: https://brain-tumor-detection-sigma-eight.vercel.app
 - GitHub repository: https://github.com/zartashhaiderr-stack/brain-tumor-detection
 - Dataset (Kaggle, Brain Tumor MRI Dataset by Masoud Nickparvar): https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
+- Project report (PDF): https://brain-tumor-detection-sigma-eight.vercel.app/report/brain-tumor-detection-report.pdf
 - Model weights (ONNX, used by this site): https://brain-tumor-detection-sigma-eight.vercel.app/model/brain_tumor_effnetb0.onnx
 - Model config and test metrics (JSON): https://brain-tumor-detection-sigma-eight.vercel.app/project.json
 - Training notebook: https://github.com/zartashhaiderr-stack/brain-tumor-detection/blob/main/notebooks/brain_tumor_detection_colab.ipynb
